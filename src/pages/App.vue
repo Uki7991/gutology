@@ -60,7 +60,6 @@ export default {
     },
     watch: {
         questions: function (newVal) {
-            console.log(newVal);
         }
     },
     methods: {
@@ -70,17 +69,20 @@ export default {
         back() {
             this.$refs.splide.go('-');
         },
-        submit() {
+        async submit() {
             let fields = {};
-            console.log
             
             this.questions.forEach(item => {
                 fields[item.fields.question] = item.fields.answer;
             })
 
-            this.$axios.post(questionBase + '/Users', {
+            await this.$axios.post(questionBase + '/Users', {
                 fields: fields,
                 typecast: true,
+            }).then(data => {
+                alert('success');
+            }).catch(data => {
+                alert('error');
             })
         }
     },
