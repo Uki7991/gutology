@@ -1,0 +1,30 @@
+{
+  "name": "gutology",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack --mode development && npx tailwindcss-cli@latest build ./src/app.css -o ./docs/app.css",
+    "prod": "webpack --mode production && npx tailwindcss-cli@latest build ./src/app.css -o ./docs/app.css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@splidejs/vue-splide": "^0.3.5",
+    "axios": "^0.21.1",
+    "tailwindcss": "^2.1.2",
+    "vue": "2.6.12"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.2.5",
+    "postcss": "^8.2.15",
+    "webpack-cli": "^4.7.0",
+    "css-loader": "^5.0.1",
+    "postcss-cli": "^8.3.1",
+    "style-loader": "^2.0.0",
+    "vue-loader": "^15.9.6",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^5.19.0"
+  }
+}
