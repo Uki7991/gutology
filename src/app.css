@@ -29,6 +29,6 @@
     }
 
     .next-btn {
-        @apply py-3 px-7 block border border-primary rounded text-primary font-bold text-lg hover:bg-primary hover:text-white transition-all duration-300;
+        @apply py-3 px-7 block border border-primary rounded text-primary font-bold text-lg disabled:opacity-75 hover:bg-primary hover:text-white transition-all duration-300;
     }
 }

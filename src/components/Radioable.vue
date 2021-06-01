@@ -4,7 +4,10 @@
             <input :value="option.id" v-model="checked" :name="id" type="radio" class="">
             <p>{{ option.answer }}</p>
         </label>
-        <button class="next-btn mt-4" @click="$emit('next')" :disabled="checked === null">Next</button>
+        <div class="flex mt-4 justify-between space-x-4">
+            <button v-if="(index != 1) && !last" class="next-btn" @click="$emit('back')">Back</button>
+            <button v-if="!last" class="next-btn" :disabled="checked === null" @click="$emit('next')">Next</button>
+        </div>
     </div>
 </template>
 
@@ -26,7 +29,9 @@ export default {
         options: {
             type: Array,
             required: true,
-        }
+        },
+        index: Number,
+        last: Boolean,
     },
     data() {
         return {

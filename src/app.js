@@ -16,7 +16,7 @@ Vue.prototype.$axios = axios.create({
 });
 
 var vm = new Vue({
-    el: "#app",
+    el: "#quiz",
     render: h => h(App)
 })
 

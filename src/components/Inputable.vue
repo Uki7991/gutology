@@ -1,7 +1,10 @@
 <template>
     <div class="flex flex-col">
         <input class="p-3" @input="e=>inputData = e.target.value" :type="computedType">
-        <button class="next-btn mt-4" @click="$emit('next')" :disabled="inputData === ''">Next</button>
+        <div class="flex mt-4 justify-between space-x-4">
+            <button v-if="(index != 1) && !last" class="next-btn" @click="$emit('back')">Back</button>
+            <button v-if="!last" class="next-btn" :disabled="inputData === ''" @click="$emit('next')">Next</button>
+        </div>
     </div>
 </template>
 
@@ -18,7 +21,9 @@ export default {
         type: {
             requred: true,
             type: String,
-        }
+        },
+        index: Number,
+        last: Boolean,
     },
     data() {
         return {

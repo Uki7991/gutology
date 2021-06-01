@@ -1,8 +1,6 @@
 module.exports = {
   purge: {
     enabled: true,
-    mode: "all",
-    preserveHtmlElements: false,
     content: [
       "./public/*.html",
       "./src/**/*.vue",
@@ -10,7 +8,11 @@ module.exports = {
   },
   darkMode: false, // or 'media' or 'class'
   theme: {
+    fontFamily: {
+      mont: 'Montserrat, sans-serif'
+    },
     extend: {
+      
       colors: {
         primary: '#2c7976',
 
@@ -18,7 +20,9 @@ module.exports = {
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      opacity: ['disabled'],
+    },
   },
   plugins: [],
 }

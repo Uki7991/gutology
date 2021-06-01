@@ -8,22 +8,21 @@
             </svg>
         </div>
         <div v-else class="flex flex-row mt-12">
-            <div class="w-8/12">
+            <div class="lg:w-8/12 w-full">
                 <splide ref="splide" :slides="questions" :options="options">
-                    <splide-slide v-for="question in questions" :key="question.id">
+                    <splide-slide v-for="(question, index) in questions" :key="question.id">
                         <div class="flex flex-col">
                             <p class="text-xl text-black font-bold mb-11">{{ question.fields.question }}</p>
-                            <selectable @next="next" v-if="question.fields.type === 'Select'" v-model="question.fields.answer" :options="question.fields.answers"></selectable>
-                            <inputable @next="next" v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :type="question.fields.type" v-model="question.fields.answer"></inputable>
-                            <checkable @next="next" v-if="question.fields.type === 'Checkbox'" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></checkable>
-                            <radioable @next="next" v-if="question.fields.type === 'Radio'" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></radioable>
+                            <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.answers"></selectable>
+                            <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :type="question.fields.type" v-model="question.fields.answer"></inputable>
+                            <checkable v-if="question.fields.type === 'Checkbox'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></checkable>
+                            <radioable v-if="question.fields.type === 'Radio'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></radioable>
+                            <button v-if="(index + 1) == questions.length" class="next-btn" @click="submit">Submit</button>
                         </div>
-                        <button @click="back">Back</button>
                     </splide-slide>
                 </splide>
-                <button @click="submit">Submit</button>
             </div>
-            <div class="w-4/12"></div>
+            <div class="lg:w-4/12 w-full"></div>
         </div>
     </div>
 </template>
@@ -88,12 +87,13 @@ export default {
     },
     async created() {
         this.loading = true;
+
         await this.$axios.get(questionBase + '/Questions?sort[0][field]=position&sort[0][direction]=asc&filterByFormula={active}=1')
             .then(data => {
                 this.questions = data.data.records
             });
 
-        await this.questions.forEach(async item => {
+        for (let item of this.questions) {
             const answers = item.fields.Answers;
             item.fields.answer = '';
 
@@ -112,12 +112,12 @@ export default {
             const type = item.fields.type[0]
             if (type) {
                 item.fields.type = '';
-                this.$axios.get(questionBase + '/Types/' + type)
+                await this.$axios.get(questionBase + '/Types/' + type)
                     .then(data => {
                         item.fields.type = data.data.fields.name
                     })
             }
-        })
+        }
 
         this.loading = false;
 
