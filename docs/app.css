@@ -821,13 +821,6 @@ option {
 }
 
 @media (min-width: 1024px) {
-  .lg\:w-4\/12 {
-    width: 33.333333%;
-  }
-
-  .lg\:w-8\/12 {
-    width: 66.666667%;
-  }
 }
 
 @media (min-width: 1280px) {

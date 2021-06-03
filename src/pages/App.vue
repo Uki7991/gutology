@@ -8,7 +8,7 @@
             </svg>
         </div>
         <div v-else class="flex flex-row mt-12">
-            <div class="lg:w-8/12 w-full">
+            <div class="w-full">
                 <splide ref="splide" :slides="questions" :options="options">
                     <splide-slide v-for="(question, index) in questions" :key="question.id">
                         <div class="flex flex-col">
@@ -22,7 +22,6 @@
                     </splide-slide>
                 </splide>
             </div>
-            <div class="lg:w-4/12 w-full"></div>
         </div>
     </div>
 </template>
