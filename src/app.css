@@ -4,7 +4,7 @@
 
 @layer base {
     input, select {
-        @apply focus:outline-none focus:ring focus:ring-primary rounded border border-primary;
+        @apply focus:outline-none focus:ring focus:ring-primary rounded border border-primary !important;
     }
     button {
         @apply focus:outline-none;
