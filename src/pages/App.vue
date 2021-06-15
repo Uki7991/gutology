@@ -104,9 +104,15 @@ export default {
                             item.fields.answers.push({
                                 id: data.data.id,
                                 answer: data.data.fields.answer,
+                                position: data.data.fields.position,
                             });
                         })
                 })
+                
+                item.fields.answers.sort((a, b) => {
+                    return parseInt(a.position) - parseInt(b.position);
+                });
+
             }
             const type = item.fields.type[0]
             if (type) {
