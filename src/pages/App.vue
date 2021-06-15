@@ -78,7 +78,7 @@ export default {
                 fields: fields,
                 typecast: true,
             }).then(data => {
-                alert('success');
+                document.getElementById('quizWrap__form').innerHTML='<p class="font-weight-bold new-p-style text-center">We`ll now find the right qualified Gutologist to work with you, based on your symptoms.</p><p class="font-weight-bold new-p-style text-center">You`ll recieve a direct message from them to your email address</p>';
             }).catch(data => {
                 alert('error');
             })
@@ -86,6 +86,15 @@ export default {
     },
     async created() {
         this.loading = true;
+        function compareNumbers(a, b) {
+          if (a.position > b.position) {
+                return 1;
+            } else if (b.position > a.position) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
 
         await this.$axios.get(questionBase + '/Questions?sort[0][field]=position&sort[0][direction]=asc&filterByFormula={active}=1')
             .then(data => {
@@ -104,14 +113,12 @@ export default {
                             item.fields.answers.push({
                                 id: data.data.id,
                                 answer: data.data.fields.answer,
-                                position: data.data.fields.position,
+                                position: data.data.fields.position
                             });
+                            item.fields.answers.sort(compareNumbers);
                         })
                 })
-                
-                item.fields.answers.sort((a, b) => {
-                    return parseInt(a.position) - parseInt(b.position);
-                });
+                console.log(item.fields.answers);
 
             }
             const type = item.fields.type[0]
@@ -122,7 +129,7 @@ export default {
                         item.fields.type = data.data.fields.name
                     })
             }
-        }
+        }        
 
         this.loading = false;
 

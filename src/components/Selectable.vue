@@ -1,6 +1,6 @@
 <template>
     <div class="w-full flex flex-col">
-        <select class="w-full p-3" v-model="selected">
+        <select class="w-full p-3 block border border-primary" v-model="selected">
             <option v-for="option in options" :key="option.id" :value="option.id">{{ option.answer }}</option>
         </select>
         <div class="flex mt-4 justify-between space-x-4">
