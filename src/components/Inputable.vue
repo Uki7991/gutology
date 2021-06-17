@@ -2,8 +2,8 @@
     <div class="flex flex-col">
         <input class="p-3" @input="e=>inputData = e.target.value" :type="computedType">
         <div class="flex mt-4 justify-between space-x-4">
-            <button v-if="(index != 1) && !last" class="next-btn" @click="$emit('back')">Back</button>
-            <button v-if="!last" class="next-btn" :disabled="inputData === ''" @click="$emit('next')">Next</button>
+            <button v-if="(index != 1) && !last && !preLast" class="next-btn" @click="$emit('back')">Back</button>
+            <button v-if="!last && !preLast" class="next-btn" :disabled="inputData === ''" @click="$emit('next')">Next</button>
         </div>
     </div>
 </template>
@@ -24,6 +24,7 @@ export default {
         },
         index: Number,
         last: Boolean,
+        preLast: Boolean,
     },
     data() {
         return {

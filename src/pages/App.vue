@@ -13,11 +13,12 @@
                     <splide-slide v-for="(question, index) in questions" :key="question.id">
                         <div class="flex flex-col">
                             <p class="text-xl text-black font-bold mb-11">{{ question.fields.question }}</p>
-                            <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.answers"></selectable>
-                            <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :type="question.fields.type" v-model="question.fields.answer"></inputable>
+                            <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.answers"></selectable>
+                            <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" :type="question.fields.type" v-model="question.fields.answer"></inputable>
                             <checkable v-if="question.fields.type === 'Checkbox'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></checkable>
                             <radioable v-if="question.fields.type === 'Radio'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></radioable>
-                            <button v-if="(index + 1) == questions.length" class="next-btn" @click="submit">Submit</button>
+                            <div class="flex mt-4 justify-between space-x-4"><span></span><button v-if="(index + 1) == (questions.length - 1)" class="next-btn nextSubmitBtn" @click="nextSubmit">Next</button></div>
+                            <button v-if="(index + 1) == questions.length" class="next-btn" @click="update">Submit</button>
                         </div>
                     </splide-slide>
                 </splide>
@@ -33,6 +34,7 @@ import '@splidejs/splide/dist/css/themes/splide-default.min.css';
 import Checkable from '../components/Checkable.vue';
 import Radioable from '../components/Radioable.vue';
 import {questionBase, answersBase} from "../credentials.config";
+import {APIKEY} from "../credentials.config";
 
 export default {
     components: {
@@ -46,6 +48,7 @@ export default {
             questions: [],
             loading: false,
             page: 1,
+            userId: null,
             options: {
                 perPage: 1,
                 gap: '1em',
@@ -67,7 +70,7 @@ export default {
         back() {
             this.$refs.splide.go('-');
         },
-        async submit() {
+        async nextSubmit() {
             let fields = {};
             
             this.questions.forEach(item => {
@@ -78,6 +81,26 @@ export default {
                 fields: fields,
                 typecast: true,
             }).then(data => {
+                this.userId = data.data.id
+                this.$refs.splide.go('+');
+
+            }).catch(data => {
+                alert('error');
+            })
+        },
+        async update() {
+            let fields = {};
+            
+            this.questions.forEach(item => {
+                fields[item.fields.question] = item.fields.answer;
+            })
+
+            await this.$axios.put(questionBase + '/Users/' + this.userId, {
+                fields: fields,
+                typecast: true,
+            }).then(data => {
+                let quizClasses = document.getElementById('quizWrap__form').classList
+                quizClasses.add('finalStep')
                 document.getElementById('quizWrap__form').innerHTML='<p class="font-weight-bold new-p-style text-center">We`ll now find the right qualified Gutologist to work with you, based on your symptoms.</p><p class="font-weight-bold new-p-style text-center">You`ll recieve a direct message from them to your email address</p>';
             }).catch(data => {
                 alert('error');
@@ -118,8 +141,6 @@ export default {
                             item.fields.answers.sort(compareNumbers);
                         })
                 })
-                console.log(item.fields.answers);
-
             }
             const type = item.fields.type[0]
             if (type) {
