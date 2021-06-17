@@ -46,6 +46,7 @@ export default {
             questions: [],
             loading: false,
             page: 1,
+            userId: null,
             options: {
                 perPage: 1,
                 gap: '1em',
@@ -61,7 +62,31 @@ export default {
         }
     },
     methods: {
-        next() {
+        async next() {
+            let fields = {};
+            
+            this.questions.forEach(item => {
+                fields[item.fields.question] = item.fields.answer;
+            })
+            if (this.userId) {
+                await this.$axios.put(questionBase + '/Users/' + this.userId, {
+                    fields: fields,
+                    typecast: true,
+                }).then(data => {
+                    console.log(data.data);
+                }).catch(data => {
+                    alert('error');
+                })
+            } else {
+                await this.$axios.post(questionBase + '/Users', {
+                    fields: fields,
+                    typecast: true,
+                }).then(data => {
+                    this.userId = data.data.id;
+                }).catch(data => {
+                    alert('error');
+                })
+            }
             this.$refs.splide.go('+');
         },
         back() {
@@ -78,7 +103,7 @@ export default {
                 fields: fields,
                 typecast: true,
             }).then(data => {
-                alert('success');
+                console.log(data.data);
             }).catch(data => {
                 alert('error');
             })
