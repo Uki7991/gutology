@@ -99,7 +99,7 @@ export default {
                 fields[item.fields.question] = item.fields.answer;
             })
 
-            await this.$axios.post(questionBase + '/Users', {
+            await this.$axios.put(questionBase + '/Users/' + this.userId, {
                 fields: fields,
                 typecast: true,
             }).then(data => {
