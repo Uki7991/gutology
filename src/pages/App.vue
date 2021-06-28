@@ -14,10 +14,9 @@
                         <div class="flex flex-col">
                             <p class="text-xl text-black font-bold mb-11">{{ question.fields.question }}</p>
                             <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.answers"></selectable>
-                            <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" :type="question.fields.type" v-model="question.fields.answer"></inputable>
+                            <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" @nextSubmit="nextSubmit" :type="question.fields.type" v-model="question.fields.answer"></inputable>
                             <checkable v-if="question.fields.type === 'Checkbox'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></checkable>
                             <radioable v-if="question.fields.type === 'Radio'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></radioable>
-                            <div class="flex mt-4 justify-between space-x-4"><span></span><button v-if="(index + 1) == (questions.length - 1)" class="next-btn nextSubmitBtn" @click="nextSubmit">Next</button></div>
                             <button v-if="(index + 1) == questions.length" class="next-btn" @click="update">Submit</button>
                         </div>
                     </splide-slide>
@@ -35,7 +34,6 @@ import Checkable from '../components/Checkable.vue';
 import Radioable from '../components/Radioable.vue';
 import {questionBase, answersBase} from "../credentials.config";
 import {APIKEY} from "../credentials.config";
-
 export default {
     components: {
         Selectable,
@@ -64,6 +62,7 @@ export default {
         }
     },
     methods: {
+
         next() {
             this.$refs.splide.go('+');
         },
@@ -72,10 +71,13 @@ export default {
         },
         async nextSubmit() {
             let fields = {};
+            let x = new Date()
+            let timeReq  = x.toLocaleDateString() + ' | ' + x.toLocaleTimeString() + ' | ' + x.getTimezoneOffset()/60 + 'GMT'
             
             this.questions.forEach(item => {
                 fields[item.fields.question] = item.fields.answer;
             })
+            fields.RequestTime = timeReq;
 
             await this.$axios.post(questionBase + '/Users', {
                 fields: fields,
@@ -90,10 +92,13 @@ export default {
         },
         async update() {
             let fields = {};
-            
+            let x = new Date()
+            let timeReq  = x.toLocaleDateString() + ' | ' + x.toLocaleTimeString() + ' | ' + x.getTimezoneOffset()/60 + 'GMT'
+                        
             this.questions.forEach(item => {
                 fields[item.fields.question] = item.fields.answer;
             })
+            fields.RequestTime = timeReq;
 
             await this.$axios.put(questionBase + '/Users/' + this.userId, {
                 fields: fields,
@@ -118,16 +123,13 @@ export default {
                 return 0;
             }
         }
-
         await this.$axios.get(questionBase + '/Questions?sort[0][field]=position&sort[0][direction]=asc&filterByFormula={active}=1')
             .then(data => {
                 this.questions = data.data.records
             });
-
         for (let item of this.questions) {
             const answers = item.fields.Answers;
             item.fields.answer = '';
-
             item.fields.answers = [];
             if (answers) {
                 await answers.forEach( answer => {
@@ -151,9 +153,7 @@ export default {
                     })
             }
         }        
-
         this.loading = false;
-
     },
 }
 </script>

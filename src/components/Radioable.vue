@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col space-y-4">
+    <div class="flex flex-col space-y-4" :class="{'flexCustomWidth': options.length >= 4}">
         <label class="tappable" v-for="option in options" :key="option.id">
             <input :value="option.id" v-model="checked" :name="id" type="radio" class="">
             <p>{{ option.answer }}</p>

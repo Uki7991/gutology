@@ -4,6 +4,7 @@
         <div class="flex mt-4 justify-between space-x-4">
             <button v-if="(index != 1) && !last && !preLast" class="next-btn" @click="$emit('back')">Back</button>
             <button v-if="!last && !preLast" class="next-btn" :disabled="inputData === ''" @click="$emit('next')">Next</button>
+            <div v-if="preLast" class="flex mt-4 justify-between space-x-4"><span></span><button class="next-btn nextSubmitBtn" :disabled="inputData === ''" @click="$emit('nextSubmit')">Next</button></div>
         </div>
     </div>
 </template>
