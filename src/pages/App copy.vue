@@ -13,10 +13,10 @@
                     <splide-slide v-for="(question, index) in questions" :key="question.id">
                         <div class="flex flex-col">
                             <p class="text-xl text-black font-bold mb-11">{{ question.fields.question }}</p>
-                            <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.item_answers"></selectable>
+                            <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.answers"></selectable>
                             <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" @nextSubmit="nextSubmit" :type="question.fields.type" v-model="question.fields.answer"></inputable>
-                            <checkable v-if="question.fields.type === 'Checkbox'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.item_answers" v-model="question.fields.answer"></checkable>
-                            <radioable v-if="question.fields.type === 'Radio'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.item_answers" v-model="question.fields.answer"></radioable>
+                            <checkable v-if="question.fields.type === 'Checkbox'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></checkable>
+                            <radioable v-if="question.fields.type === 'Radio'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.answers" v-model="question.fields.answer"></radioable>
                             <button v-if="(index + 1) == questions.length" class="next-btn" @click="update">Submit</button>
                         </div>
                     </splide-slide>
@@ -33,7 +33,7 @@ import '@splidejs/splide/dist/css/themes/splide-default.min.css';
 import Checkable from '../components/Checkable.vue';
 import Radioable from '../components/Radioable.vue';
 import {questionBase, answersBase} from "../credentials.config";
-
+import {APIKEY} from "../credentials.config";
 export default {
     components: {
         Selectable,
@@ -43,10 +43,7 @@ export default {
     },
     data() {
         return {
-            offset: '&offset=0',
             questions: [],
-            answers: [],
-            types: [],
             loading: false,
             page: 1,
             userId: null,
@@ -127,50 +124,32 @@ export default {
             .then(data => {
                 this.questions = data.data.records
             });
- 
-        while(this.offset != '') {
-            await this.$axios.get(answersBase + '/Answers?maxRecords=300' + this.offset)
-                .then(data => {
-                    let answers_arr = data.data.records
-                    this.answers = this.answers.concat(answers_arr)
-                    if(data.data.offset) {
-                        this.offset = '&offset=' + data.data.offset
-                    } else this.offset = ''
-                });
-        }
-        await this.$axios.get(questionBase + '/Types/')
-            .then(data => {
-                this.types = data.data.records
-            })            
-
         for (let item of this.questions) {
-            const item_answers = item.fields.Answers;
+            const answers = item.fields.Answers;
             item.fields.answer = '';
-            item.fields.item_answers = [];
-            if (item_answers) {
-                this.answers.forEach( answer => {
-
-                     if(answer.fields.question_id == item.id) {
-                        item.fields.item_answers.push({
-                            id: answer.id,
-                            answer: answer.fields.answer,
-                            position: answer.fields.position
-                        });
-                        item.fields.item_answers.sort(compareNumbers);
-                     }
-
+            item.fields.answers = [];
+            if (answers) {
+                await answers.forEach( answer => {
+                     this.$axios.get(questionBase + '/Answers/' + answer)
+                        .then(data => {
+                            item.fields.answers.push({
+                                id: data.data.id,
+                                answer: data.data.fields.answer,
+                                position: data.data.fields.position
+                            });
+                            item.fields.answers.sort(compareNumbers);
+                        })
                 })
             }
-            var type = item.fields.type[0]
+            const type = item.fields.type[0]
             if (type) {
-                this.types.forEach( type_item => {
-                    if(type_item.id == type) {
-                        item.fields.type = type_item.fields.name
-                    }
-                })
-
+                item.fields.type = '';
+                await this.$axios.get(questionBase + '/Types/' + type)
+                    .then(data => {
+                        item.fields.type = data.data.fields.name
+                    })
             }
-        }       
+        }        
         this.loading = false;
     },
 }
