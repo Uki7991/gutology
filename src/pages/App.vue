@@ -13,11 +13,15 @@
                     <splide-slide v-for="(question, index) in questions" :key="question.id">
                         <div class="flex flex-col">
                             <p class="text-xl text-black font-bold mb-11">{{ question.fields.question }}</p>
-                            <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.item_answers"></selectable>
-                            <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :preLast="(index + 1) == (questions.length - 1)" :index="index + 1" @back="back" @next="next" @nextSubmit="nextSubmit" :type="question.fields.type" v-model="question.fields.answer"></inputable>
+                            <selectable v-if="question.fields.type === 'Select'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" v-model="question.fields.answer" :options="question.fields.item_answers"></selectable>
+                            <inputable v-if="question.fields.type === 'Input' || question.fields.type === 'Email'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :type="question.fields.type" v-model="question.fields.answer"></inputable>
                             <checkable v-if="question.fields.type === 'Checkbox'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.item_answers" v-model="question.fields.answer"></checkable>
                             <radioable v-if="question.fields.type === 'Radio'" :last="(index + 1) == questions.length" :index="index + 1" @back="back" @next="next" :id="question.id" :options="question.fields.item_answers" v-model="question.fields.answer"></radioable>
-                            <button v-if="(index + 1) == questions.length" class="next-btn" @click="update">Submit</button>
+                            <div v-if="(index + 1) == questions.length" class="receive-confirm">
+                                <p><label><input type="checkbox" v-model="ReceiveEmailFromPractitioner"> I'm happy to receive an email from practitioner.  I understand that my information will be transmitted to relevant practitioners for them to contact.</label></p>
+                                <p><label><input type="checkbox" v-model="ReceiveInformationFromGutology"> I would like to receive information on gut health and offers from Gutology</label></p>
+                            </div>
+                            <button v-if="(index + 1) == questions.length" class="next-btn" @click="update" :disabled="!ReceiveEmailFromPractitioner">Submit</button>
                         </div>
                     </splide-slide>
                 </splide>
@@ -57,7 +61,9 @@ export default {
                 arrows: false,
                 pagination: false,
                 drag: false,
-            }
+            },
+            ReceiveEmailFromPractitioner: true,
+            ReceiveInformationFromGutology: false
         }
     },
     watch: {
@@ -71,45 +77,31 @@ export default {
         back() {
             this.$refs.splide.go('-');
         },
-        async nextSubmit() {
-            let fields = {};
-            let x = new Date()
-            let timeReq  = x.toLocaleDateString() + ' | ' + x.toLocaleTimeString() + ' | ' + x.getTimezoneOffset()/60 + 'GMT'
-            
-            this.questions.forEach(item => {
-                fields[item.fields.question] = item.fields.answer;
-            })
-            fields.RequestTime = timeReq;
-            await this.$axios.post(questionBase + '/Users', {
-                fields: fields,
-                typecast: true,
-            }).then(data => {
-                this.userId = data.data.id
-                this.$refs.splide.go('+');
-            }).catch(data => {
-                alert('error');
-            })
-        },
         async update() {
             let fields = {};
             let x = new Date()
             let timeReq  = x.toLocaleDateString() + ' | ' + x.toLocaleTimeString() + ' | ' + x.getTimezoneOffset()/60 + 'GMT'
-                        
+
             this.questions.forEach(item => {
                 fields[item.fields.question] = item.fields.answer;
             })
+
             fields.RequestTime = timeReq;
-            await this.$axios.put(questionBase + '/Users/' + this.userId, {
+            fields.ReceiveEmailFromPractitioner = this.ReceiveEmailFromPractitioner ? "YES" : "NO"
+            fields.ReceiveInformationFromGutology = this.ReceiveInformationFromGutology ? "YES" : "NO"
+
+            await this.$axios.post(questionBase + '/Users', {
                 fields: fields,
                 typecast: true,
             }).then(data => {
                 let quizClasses = document.getElementById('quizWrap__form').classList
                 quizClasses.add('finalStep')
-                window.location.href = '/';
-                // document.getElementById('quizWrap__form').innerHTML='<p class="font-weight-bold new-p-style text-center">We`ll now find the right qualified Gutologist to work with you, based on your symptoms.</p><p class="font-weight-bold new-p-style text-center">You`ll recieve a direct message from them to your email address</p>';
+                document.getElementById('quizWrap__form').innerHTML='<p class="font-weight-bold new-p-style text-center">We`ll now find the right qualified Gutologist to work with you, based on your symptoms.</p><p class="font-weight-bold new-p-style text-center">You`ll recieve a direct message from them to your email address</p>';
+                // window.location.href = '/';
             }).catch(data => {
                 alert('error');
             })
+            
         }
     },
     async created() {

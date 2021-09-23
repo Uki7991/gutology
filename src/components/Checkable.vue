@@ -36,12 +36,37 @@ export default {
     data() {
         return {
             checked: [],
+            noneAbove: false
+        }
+    },
+    mounted() {
+        this.options.forEach((option)=>{
+            let str = 'None of the above'
+            if(option.answer.toLowerCase().trim() === str.toLowerCase()) this.noneAbove = option.id;
+        })
+    },
+    computed: {
+        checkedSplice() {
+            this.checked.splice(0,this.checked.length-1);
+        },
+        checkedSpliceT() {
+            this.checked.splice(0,1);
         }
     },
     watch: {
         checked(newVal) {
             this.$emit('change', newVal);
+
+
+            if(newVal.length > 0) {
+                if(newVal[newVal.length-1] == this.noneAbove) {
+                    this.checkedSplice
+                } else if(newVal[0] == this.noneAbove) {
+                    this.checkedSpliceT
+                }
+            }
+
         }
-    },
+    }
 }
 </script>
